@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<BuildLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ProjectInfo>
+    <Name>Data Generator</Name>
+    <LastWriteTime>2015-05-12T21:00:18.4736932Z</LastWriteTime>
+    <LastKnownProtectionLevel>EncryptSensitiveWithPassword</LastKnownProtectionLevel>
+    <Salt>qty9+nUc</Salt>
+    <LastKnownProtectedHashedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA5OKuVcEMOUW//sAM8lsgrgAAAAACAAAAAAADZgAAwAAAABAAAAAg5DZdvG5h9/djFWQaqpNOAAAAAASAAACgAAAAEAAAAHPFcmxI+2/KNRsD/j/bHxYoAAAAoDnF/rhzbLyWQNsw8a4u3nMPi5TyDXuorgOPKm7GzO0PV2YDjrjeEBQAAABVMEa5I+Z9S8DRaDxp8Ozzk/Dk6Q==</LastKnownProtectedHashedPassword>
+  </ProjectInfo>
+  <LastBuildInfos>
+    <ProjectBuildItemInfo>
+      <Name>Package.dtsx</Name>
+      <LastWriteTime>2015-05-13T23:18:53.0863453Z</LastWriteTime>
+      <LastKnownProtectionLevel>EncryptSensitiveWithPassword</LastKnownProtectionLevel>
+      <Salt>El9WXUtf</Salt>
+      <LastKnownProtectedHashedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA5OKuVcEMOUW//sAM8lsgrgAAAAACAAAAAAADZgAAwAAAABAAAAA4Ymbu1ZbxYPV4bqBJqo3kAAAAAASAAACgAAAAEAAAAJQFrFWqwz9eUIPqjfVgxbsoAAAAJnEj/p8EcZNYDKAumjfmU8qi3YIdcvlUBNsMFFyciYbqc5TnOXhFcBQAAAA3D6c7OXvgVj8KQ+NGMx7w8PAPhA==</LastKnownProtectedHashedPassword>
+    </ProjectBuildItemInfo>
+  </LastBuildInfos>
+</BuildLog>

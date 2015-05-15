@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<BuildLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ProjectInfo>
+    <Name>Refresh Staging</Name>
+    <LastWriteTime>2015-05-13T20:27:41.3674724Z</LastWriteTime>
+    <LastKnownProtectionLevel>EncryptSensitiveWithPassword</LastKnownProtectionLevel>
+    <Salt>EUwtZYF6</Salt>
+    <LastKnownProtectedHashedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA5OKuVcEMOUW//sAM8lsgrgAAAAACAAAAAAADZgAAwAAAABAAAAAu7bs8158MyUuUo7JEAg4gAAAAAASAAACgAAAAEAAAAN8vceO9noRQ8XL6uMER+KwoAAAAubgXiV2VLX7O2i2oSXuX8nvMZd86fqNAbPi9ZczRpmT0js5oPPuNZBQAAADMez/Tnev1aVF7a68PhdjsKjqThw==</LastKnownProtectedHashedPassword>
+  </ProjectInfo>
+  <LastBuildInfos>
+    <ProjectBuildItemInfo>
+      <Name>Package.dtsx</Name>
+      <LastWriteTime>2015-05-13T21:54:33.9396635Z</LastWriteTime>
+      <LastKnownProtectionLevel>EncryptSensitiveWithPassword</LastKnownProtectionLevel>
+      <Salt>heF0ie+v</Salt>
+      <LastKnownProtectedHashedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA5OKuVcEMOUW//sAM8lsgrgAAAAACAAAAAAADZgAAwAAAABAAAAAc7Q5dFJ80kPa8wbOPnpzVAAAAAASAAACgAAAAEAAAAI3t0tMUiktyks3qFMqHZlgoAAAAsXeksIBcLMhuLRWaZ/ny8U2XSCD+aAxQ25o3rc2fH86rFZOBR8xzSxQAAACPg0+h8h1RsrR0J/+VawIiJPY5YA==</LastKnownProtectedHashedPassword>
+    </ProjectBuildItemInfo>
+  </LastBuildInfos>
+</BuildLog>
