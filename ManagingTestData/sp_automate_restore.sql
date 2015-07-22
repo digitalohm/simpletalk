@@ -1,10 +1,8 @@
 USE [master]
 GO
-
-/****** Object:  StoredProcedure [dbo].[sp_automate_restore]    Script Date: 4/11/2015 9:44:46 AM ******/
+/****** Object:  StoredProcedure [dbo].[sp_automate_restore]    Script Date: 7/22/2015 11:46:19 AM ******/
 SET ANSI_NULLS ON
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 
@@ -33,20 +31,25 @@ GO
 -- dbo.sp_automate_restore @DatabaseName = 'AdventureWorks2014',
 --                                        @UncPath = '\\BACKUP PATH\Used in Ola's Scripts',
 --                                        @DebugLevel = 2,
---                                        @PointInTime = '20150402001601'
+--                                        @PointInTime = '20150402001601',
+--                                        @NewDatabaseName = NULL  
 
 -- dbo.sp_automate_restore @DatabaseName = 'AdventureWorks2014',
 --                                        @UncPath = ''\\BACKUP PATH\Used in Ola's Scripts',
 --                                        @DebugLevel = 2,
---                                        @PointInTime = NULL
+--                                        @PointInTime = NULL,
+--                                        @NewDatabaseName = NULL
 --
 -- 04022015 - Still looking for more test cases.
+-- 07222015 - Modified by Andy Garrett to allow database to be restored to new database.  To restore, pass in name of the new database using the @NewDatabaseName variable.
+--          - Also modified to take into account any spaces in the name of the database, as the scripts by Ola removes spaces.  This was causing the Path to the backups to fail
 -- =============================================
-CREATE PROCEDURE [dbo].[sp_automate_restore]
+ALTER PROCEDURE [dbo].[sp_automate_restore]
     @DatabaseName VARCHAR(255)
    ,@UncPath VARCHAR(255)
    ,@DebugLevel INT
    ,@PointInTime CHAR(16)
+   ,@NewDatabaseName VARCHAR(255)
 AS
     BEGIN
         SET NOCOUNT ON;
@@ -63,11 +66,22 @@ AS
         DECLARE @backupFile NVARCHAR(500)
         DECLARE @SQL VARCHAR(MAX)
         DECLARE @DebugLevelString VARCHAR(MAX)
+		DECLARE @backupDBName NVARCHAR(255)
+		DECLARE @newDB bit
 
 		--Variable initialization
         SET @DebugLevelString = 'Debug Statement: ';
         SET @dbName = @DatabaseName
-        SET @backupPath = @UncPath + '\' + @@SERVERNAME + '\' + @dbName
+		SET @backupDBName = REPLACE(@dbName, ' ', '')
+		IF (@NewDatabaseName is not NULL)
+			BEGIN
+				SET @dbName = @NewDatabaseName
+				SET @newDB = 1
+			END
+		IF ((@DebugLevel = 1 OR @DebugLevel = 3) AND (@DatabaseName != @dbName))
+			PRINT 'Database is being Restored to a new database: ' + @dbName
+
+        SET @backupPath = @UncPath + '\' + CAST(SERVERPROPERTY('ServerName') AS nvarchar) + '\' + @backupDBName
             + '\FULL\'
         IF (@DebugLevel = 1
             OR @DebugLevel = 3
@@ -85,7 +99,7 @@ AS
             @fileList
         WHERE
             backupFile LIKE '%_FULL_%'
-            AND backupFile LIKE '%' + @dbName + '%'
+            AND backupFile LIKE '%' + @backupDBName + '%'
         IF (@DebugLevel = 1
             OR @DebugLevel = 3
            )
@@ -93,8 +107,29 @@ AS
                 PRINT @DebugLevelString + '@lastFullBackup = '
                     + @lastFullBackup
             END
-        SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
-            + @backupPath + @lastFullBackup + ''' WITH REPLACE, NORECOVERY'
+        IF (@newDB = 0)
+			BEGIN
+				SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
+					+ @backupPath + @lastFullBackup + ''' WITH REPLACE, NORECOVERY'
+			END
+		ELSE
+			BEGIN
+				DECLARE @Table TABLE (LogicalName varchar(128),[PhysicalName] varchar(128), [Type] varchar, [FileGroupName] varchar(128), [Size] varchar(128), 
+							[MaxSize] varchar(128), [FileId]varchar(128), [CreateLSN]varchar(128), [DropLSN]varchar(128), [UniqueId]varchar(128), [ReadOnlyLSN]varchar(128), [ReadWriteLSN]varchar(128), 
+							[BackupSizeInBytes]varchar(128), [SourceBlockSize]varchar(128), [FileGroupId]varchar(128), [LogGroupGUID]varchar(128), [DifferentialBaseLSN]varchar(128), [DifferentialBaseGUID]varchar(128), [IsReadOnly]varchar(128), [IsPresent]varchar(128), [TDEThumbprint]varchar(128)
+				)
+				DECLARE @Path varchar(1000)='' + @backupPath + @lastFullBackup + ''
+				DECLARE @LogicalNameData varchar(128),@LogicalNameLog varchar(128)
+				INSERT INTO @table
+				EXEC('RESTORE FILELISTONLY FROM DISK=''' +@Path+ '''')
+ 			    SET @LogicalNameData=(SELECT LogicalName FROM @Table WHERE Type='D')
+				SET @LogicalNameLog=(SELECT LogicalName FROM @Table WHERE Type='L') 
+
+				SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
+					+ @backupPath + @lastFullBackup + ''' WITH REPLACE, NORECOVERY,'
+					+ 'MOVE ''' + @LogicalNameData + ''' TO ''C:\SQLDATAStore\Temp\' + @dbName + '.mdf'', ' 
+					+ 'MOVE ''' + @LogicalNameLog + ''' TO ''C:\SQLDATAStore\Temp\' + @dbName + '.ldf''; ' 
+			END
         IF (@DebugLevel = 2
             OR @DebugLevel = 3
            )
@@ -103,7 +138,7 @@ AS
         IF (@DebugLevel IS NULL)
             EXEC sp_executesql @cmd
 		--Set the path for the differential backups
-        SET @backupPath = @UncPath + '\' + @@SERVERNAME + '\' + @dbName
+        SET @backupPath = @UncPath + '\' + CAST(SERVERPROPERTY('ServerName') AS nvarchar) + '\' + @backupDBName
             + '\DIFF\'
         IF (@DebugLevel = 1
             OR @DebugLevel = 3
@@ -120,7 +155,7 @@ AS
             @fileList
         WHERE
             backupFile LIKE '%_DIFF_%'
-            AND backupFile LIKE '%' + @dbName + '%'
+            AND backupFile LIKE '%' + @backupDBName + '%'
         IF (@DebugLevel = 1
             OR @DebugLevel = 3
            )
@@ -146,8 +181,12 @@ AS
                         + @lastFullBackup
             END
 		--Set the path for the log backups
-        SET @backupPath = @UncPath + '\' + @@SERVERNAME + '\' + @dbName
+        SET @backupPath = @UncPath + '\' + CAST(SERVERPROPERTY('ServerName') AS nvarchar) + '\' + @backupDBName
             + '\LOG\'
+		IF (@DebugLevel = 1
+            OR @DebugLevel = 3
+           )
+            PRINT @DebugLevelString + '@backupPath = ' + @backupPath
 		--Declaring some variables for comparison and string manipuations
         DECLARE
             @lfb VARCHAR(255)
@@ -172,7 +211,7 @@ AS
                 @fileList
             WHERE
                 backupFile LIKE '%_LOG_%'
-                AND backupFile LIKE '%' + @dbName + '%'
+                AND backupFile LIKE '%' + @backupDBName + '%'
                 AND REPLACE(LEFT(RIGHT(backupFile,19),15),'_','') > @ldb
         OPEN backupFiles
 		-- Loop through all the files for the database
@@ -261,6 +300,3 @@ AS
         IF (@DebugLevel IS NULL)
             EXEC sp_executesql @cmd
     END
-GO
-
-
