@@ -44,7 +44,7 @@ GO
 -- 07222015 - Modified by Andy Garrett to allow database to be restored to new database.  To restore, pass in name of the new database using the @NewDatabaseName variable.
 --          - Also modified to take into account any spaces in the name of the database, as the scripts by Ola removes spaces.  This was causing the Path to the backups to fail
 -- =============================================
-ALTER PROCEDURE [dbo].[sp_automate_restore]
+CREATE PROCEDURE [dbo].[sp_automate_restore]
     @DatabaseName VARCHAR(255)
    ,@UncPath VARCHAR(255)
    ,@DebugLevel INT
