@@ -119,16 +119,18 @@ AS
 							[BackupSizeInBytes]varchar(128), [SourceBlockSize]varchar(128), [FileGroupId]varchar(128), [LogGroupGUID]varchar(128), [DifferentialBaseLSN]varchar(128), [DifferentialBaseGUID]varchar(128), [IsReadOnly]varchar(128), [IsPresent]varchar(128), [TDEThumbprint]varchar(128)
 				)
 				DECLARE @Path varchar(1000)='' + @backupPath + @lastFullBackup + ''
-				DECLARE @LogicalNameData varchar(128),@LogicalNameLog varchar(128)
+				DECLARE @LogicalNameData varchar(128),@LogicalNameLog varchar(128),@StorageFolder varchar(128)
 				INSERT INTO @table
 				EXEC('RESTORE FILELISTONLY FROM DISK=''' +@Path+ '''')
  			    SET @LogicalNameData=(SELECT LogicalName FROM @Table WHERE Type='D')
-				SET @LogicalNameLog=(SELECT LogicalName FROM @Table WHERE Type='L') 
+				SET @LogicalNameLog=(SELECT LogicalName FROM @Table WHERE Type='L')
+                SET @StorageFolder=(SELECT PhysicalName FROM @Table where Type='D')
+                SET @StorageFolder = SUBSTRING(@StorageFolder, 0, CHARINDEX('\', @StorageFolder, 4)+1) + 'Temp\'
 
 				SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
 					+ @backupPath + @lastFullBackup + ''' WITH REPLACE, NORECOVERY,'
-					+ 'MOVE ''' + @LogicalNameData + ''' TO ''C:\SQLDATAStore\Temp\' + @dbName + '.mdf'', ' 
-					+ 'MOVE ''' + @LogicalNameLog + ''' TO ''C:\SQLDATAStore\Temp\' + @dbName + '.ldf''; ' 
+					+ 'MOVE ''' + @LogicalNameData + ''' TO ''' + @StorageFolder + @dbName + '.mdf'', ' 
+					+ 'MOVE ''' + @LogicalNameLog + ''' TO ''' + @StorageFolder + @dbName + '.ldf''; ' 
 			END
         IF (@DebugLevel = 2
             OR @DebugLevel = 3
