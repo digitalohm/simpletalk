@@ -125,7 +125,7 @@ AS
  			    SET @LogicalNameData=(SELECT LogicalName FROM @Table WHERE Type='D')
 				SET @LogicalNameLog=(SELECT LogicalName FROM @Table WHERE Type='L')
                 SET @StorageFolder=(SELECT PhysicalName FROM @Table where Type='D')
-                SET @StorageFolder = SUBSTRING(@StorageFolder, 0, CHARINDEX('\', @StorageFolder, 4)+1) + 'Temp\'
+                SET @StorageFolder = SUBSTRING(@StorageFolder, 0, LEN(@StorageFolder) - LEN(REVERSE(SUBSTRING(REVERSE(@StorageFolder),0,CHARINDEX('\',REVERSE(@StorageFolder))))) + 1) + 'Temp\'
 
 				SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
 					+ @backupPath + @lastFullBackup + ''' WITH REPLACE, NORECOVERY,'
