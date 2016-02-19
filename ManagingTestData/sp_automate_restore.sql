@@ -221,6 +221,7 @@ AS
                 backupFile LIKE '%_LOG_%'
                 AND backupFile LIKE '%' + @backupDBName + '%'
                 AND REPLACE(LEFT(RIGHT(backupFile,19),15),'_','') > @ldb
+            ORDER BY backupFile
         OPEN backupFiles
 		-- Loop through all the files for the database
         FETCH NEXT FROM backupFiles INTO @backupFile
