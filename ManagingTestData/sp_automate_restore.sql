@@ -183,7 +183,7 @@ AS
                                                               0,
                                                               CHARINDEX('\',
                                                               REVERSE(@StorageFolder)))))
-                                               + 1) + 'Temp\';
+                                               + 1); --We need to fix this so that it is applicable elsewhere + 'Temp\';
 
                 SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
                     + @backupPath + @lastFullBackup
@@ -220,7 +220,7 @@ AS
            )
             PRINT @DebugLevelString + '@lastDiffBackup = ' + @lastDiffBackup;
 		--Check to make sure there is a diff backup
-        IF @lastDiffBackup IS NOT NULL
+        IF @lastDiffBackup IS NOT NULL AND REPLACE(LEFT(RIGHT(@lastFullBackup, 19), 15), '_','') > REPLACE(LEFT(RIGHT(@lastDiffBackup, 19), 15), '_','')
             BEGIN
                 SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
                     + @backupPath + @lastDiffBackup
