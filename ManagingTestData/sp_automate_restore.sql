@@ -43,6 +43,8 @@ GO
 -- 04022015 - Still looking for more test cases.
 -- 07222015 - Modified by Andy Garrett to allow database to be restored to new database.  To restore, pass in name of the new database using the @NewDatabaseName variable.
 --          - Also modified to take into account any spaces in the name of the database, as the scripts by Ola removes spaces.  This was causing the Path to the backups to fail
+-- 02182016 - @ServerName parameter added by Remi Ferland
+--          - Used to overwrite the source server in the backup path
 -- =============================================
 CREATE PROCEDURE [dbo].[sp_automate_restore]
     @DatabaseName VARCHAR(255)
@@ -50,6 +52,7 @@ CREATE PROCEDURE [dbo].[sp_automate_restore]
    ,@DebugLevel INT
    ,@PointInTime CHAR(16)
    ,@NewDatabaseName VARCHAR(255)
+   ,@ServerName VARCHAR(255) = NULL
 AS
     BEGIN
         SET NOCOUNT ON;
@@ -80,8 +83,11 @@ AS
 			END
 		IF ((@DebugLevel = 1 OR @DebugLevel = 3) AND (@DatabaseName != @dbName))
 			PRINT 'Database is being Restored to a new database: ' + @dbName
-
-        SET @backupPath = @UncPath + '\' + CAST(SERVERPROPERTY('ServerName') AS nvarchar) + '\' + @backupDBName
+			
+	IF (@ServerName is NULL)
+		SET @ServerName = CAST(SERVERPROPERTY('ServerName') AS nvarchar)
+	
+        SET @backupPath = @UncPath + '\' + @ServerName + '\' + @backupDBName
             + '\FULL\'
         IF (@DebugLevel = 1
             OR @DebugLevel = 3
@@ -140,7 +146,7 @@ AS
         IF (@DebugLevel IS NULL)
             EXEC sp_executesql @cmd
 		--Set the path for the differential backups
-        SET @backupPath = @UncPath + '\' + CAST(SERVERPROPERTY('ServerName') AS nvarchar) + '\' + @backupDBName
+        SET @backupPath = @UncPath + '\' + @ServerName + '\' + @backupDBName
             + '\DIFF\'
         IF (@DebugLevel = 1
             OR @DebugLevel = 3
@@ -183,7 +189,7 @@ AS
                         + @lastFullBackup
             END
 		--Set the path for the log backups
-        SET @backupPath = @UncPath + '\' + CAST(SERVERPROPERTY('ServerName') AS nvarchar) + '\' + @backupDBName
+        SET @backupPath = @UncPath + '\' + @ServerName + '\' + @backupDBName
             + '\LOG\'
 		IF (@DebugLevel = 1
             OR @DebugLevel = 3
@@ -215,6 +221,7 @@ AS
                 backupFile LIKE '%_LOG_%'
                 AND backupFile LIKE '%' + @backupDBName + '%'
                 AND REPLACE(LEFT(RIGHT(backupFile,19),15),'_','') > @ldb
+            ORDER BY backupFile
         OPEN backupFiles
 		-- Loop through all the files for the database
         FETCH NEXT FROM backupFiles INTO @backupFile
