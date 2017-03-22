@@ -218,9 +218,12 @@ AS
         IF ( @DebugLevel = 1
              OR @DebugLevel = 3
            )
-            PRINT @DebugLevelString + '@lastDiffBackup = ' + @lastDiffBackup;
+            PRINT @DebugLevelString + '@lastDiffBackup = ' + @lastDiffBackup;                 --   '20170322000021'
 		--Check to make sure there is a diff backup
-        IF @lastDiffBackup IS NOT NULL AND REPLACE(LEFT(RIGHT(@lastFullBackup, 19), 15), '_','') > REPLACE(LEFT(RIGHT(@lastDiffBackup, 19), 15), '_','')
+        IF @lastDiffBackup IS NOT NULL
+            AND REPLACE(LEFT(RIGHT(@lastFullBackup, 19), 15), '_', '') !> REPLACE(LEFT(RIGHT(@lastDiffBackup,
+                                                              19), 15), '_',
+                                                              '')
             BEGIN
                 SET @cmd = 'RESTORE DATABASE ' + @dbName + ' FROM DISK = '''
                     + @backupPath + @lastDiffBackup
@@ -239,6 +242,10 @@ AS
                    )
                     PRINT @DebugLevelString + '@lastFullBackup = '
                         + @lastFullBackup;
+                PRINT '@lastFullBackup Parsed '
+                    + REPLACE(LEFT(RIGHT(@lastFullBackup, 19), 15), '_', '');
+                PRINT '@lastDiffBackup Parsed '
+                    + REPLACE(LEFT(RIGHT(@lastDiffBackup, 19), 15), '_', '');
             END;
 		--Set the path for the log backups
         SET @backupPath = @UncPath + '\' + @ServerName + '\' + @backupDBName
@@ -352,6 +359,7 @@ AS
             END;
         CLOSE backupFiles;
         DEALLOCATE backupFiles;
+
 		--End with recovery so that the database is put back into a working state.
         SET @cmd = 'RESTORE DATABASE ' + @dbName + ' WITH RECOVERY';
         IF ( @DebugLevel = 2
